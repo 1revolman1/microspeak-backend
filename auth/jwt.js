@@ -14,6 +14,7 @@ const JWTCookieFactory = function (
   }
 ) {
   return new JwtStrategy(option, async function (jwt_payload, done) {
+    console.log("Payload ", jwt_payload);
     done(null, jwt_payload);
   });
 };

@@ -10,7 +10,6 @@ const {
 } = require("../auth");
 
 auth.post("/registration", async (req, res) => {
-  console.log(req.body);
   const User = new UserModel(req.body);
   try {
     const result = await User.save();
@@ -22,14 +21,19 @@ auth.post("/registration", async (req, res) => {
 
 auth.post("/login", loginLocalMiddleware, async (req, res) => {
   if (req.user) {
-    console.log(req.user, req.body);
     const { email, avatar, active, _id } = req.user;
     const refreshTokenTime = Math.floor(Date.now() / 1000) + 60 * 60;
+    // const refreshTokenTime = Math.floor(
+    //   moment().add(1, "hour").valueOf() / 1000
+    // );
     const refreshToken = jwt.sign(
       {
         email,
         _id,
         exp: refreshTokenTime,
+        // exp: Math.floor(Date.now() / 1000) + 60,
+        // exp: 10,
+        // exp: refreshTokenTime,
       },
       process.env.SECRET
     );
@@ -37,9 +41,11 @@ auth.post("/login", loginLocalMiddleware, async (req, res) => {
       {
         email,
         _id,
+        exp: Math.floor(Date.now() / 1000) + 60,
+        // exp: 5000,
       },
-      process.env.SECRET,
-      { expiresIn: "1h" }
+      process.env.SECRET
+      // { expiresIn: "1m" }
     );
     try {
       const response = await UserModel.updateOne({ email }, { refreshToken });

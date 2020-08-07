@@ -30,6 +30,7 @@ function JWTlCookieMiddleware(...args) {
     { session: false },
     (error, receiveData, info) => {
       const [req, res, next] = args;
+      // console.log(receiveData);
       if (receiveData) {
         req.user = receiveData;
         next();
