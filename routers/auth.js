@@ -9,6 +9,8 @@ const {
   JWTlAuthMiddleware,
 } = require("../auth");
 
+//JSON expires in seconds. COOKIES in miniseconds
+
 auth.post("/registration", async (req, res) => {
   const User = new UserModel(req.body);
   try {
@@ -26,6 +28,7 @@ auth.post("/login", loginLocalMiddleware, async (req, res) => {
     // const refreshTokenTime = Math.floor(
     //   moment().add(1, "hour").valueOf() / 1000
     // );
+    console.log(refreshTokenTime);
     const refreshToken = jwt.sign(
       {
         email,
@@ -50,7 +53,7 @@ auth.post("/login", loginLocalMiddleware, async (req, res) => {
     try {
       const response = await UserModel.updateOne({ email }, { refreshToken });
       res.cookie("JWT", refreshToken, {
-        maxAge: refreshTokenTime,
+        maxAge: 50000,
         httpOnly: true,
         path: "/api/authentication",
       });
