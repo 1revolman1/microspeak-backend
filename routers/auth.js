@@ -9,7 +9,7 @@ const {
   JWTlAuthMiddleware,
 } = require("../auth");
 
-//JSON expires in seconds. COOKIES in miniseconds
+//JSON expires in seconds. COOKIES in mini seconds
 
 auth.post("/registration", async (req, res) => {
   const User = new UserModel(req.body);
@@ -23,20 +23,17 @@ auth.post("/registration", async (req, res) => {
 
 auth.post("/login", loginLocalMiddleware, async (req, res) => {
   if (req.user) {
-    const { email, avatar, active, _id } = req.user;
-    const refreshTokenTime = Math.floor(Date.now() / 1000) + 60 * 60;
-    // const refreshTokenTime = Math.floor(
-    //   moment().add(1, "hour").valueOf() / 1000
-    // );
-    console.log(refreshTokenTime);
+    const {
+      user: { email, avatar, active, _id },
+      body: { fingerprint },
+    } = req;
+    //IN MINI SECONDS
+    const refreshTokenTime = moment();
     const refreshToken = jwt.sign(
       {
         email,
         _id,
-        exp: refreshTokenTime,
-        // exp: Math.floor(Date.now() / 1000) + 60,
-        // exp: 10,
-        // exp: refreshTokenTime,
+        exp: Math.floor(refreshTokenTime.add(24, "hour").valueOf() / 1000),
       },
       process.env.SECRET
     );
@@ -44,18 +41,20 @@ auth.post("/login", loginLocalMiddleware, async (req, res) => {
       {
         email,
         _id,
-        exp: Math.floor(Date.now() / 1000) + 60,
-        // exp: 5000,
+        exp: Math.floor(refreshTokenTime.add(1, "hour").valueOf() / 1000),
       },
       process.env.SECRET
-      // { expiresIn: "1m" }
     );
     try {
-      const response = await UserModel.updateOne({ email }, { refreshToken });
+      const response = await UserModel.updateOne(
+        { email },
+        { refreshToken, fingerprint }
+      );
       res.cookie("JWT", refreshToken, {
-        maxAge: 50000,
+        //It's about in how many miliseconds your cookie will expire.
+        maxAge: 3600000 * 24,
         httpOnly: true,
-        path: "/api/authentication",
+        path: "/",
       });
       res.json({
         login: true,
@@ -82,7 +81,7 @@ auth.post("/refresh-token", JWTlCookieMiddleware, async (req, res) => {
         res.cookie("JWT", "213", {
           maxAge: 0,
           httpOnly: true,
-          path: "/api/authentication",
+          path: "/",
         });
         res.json({ login: false, error: "Missing user" });
       } else if (!user.isValidFingerPrint(req.body.fingerprint)) {
@@ -94,16 +93,16 @@ auth.post("/refresh-token", JWTlCookieMiddleware, async (req, res) => {
         res.cookie("JWT", "213", {
           maxAge: 0,
           httpOnly: true,
-          path: "/api/authentication",
+          path: "/",
         });
         res.json({ login: false, error: "TOKEN EXPIRED" });
       } else {
-        const refreshTokenTime = Math.floor(Date.now() / 1000) + 60 * 60;
+        const refreshTokenTime = moment();
         const refreshToken = jwt.sign(
           {
             email,
             _id,
-            exp: refreshTokenTime,
+            exp: Math.floor(refreshTokenTime.add(24, "hour").valueOf() / 1000),
           },
           process.env.SECRET
         );
@@ -111,15 +110,16 @@ auth.post("/refresh-token", JWTlCookieMiddleware, async (req, res) => {
           {
             email,
             _id,
+            exp: Math.floor(refreshTokenTime.add(1, "hour").valueOf() / 1000),
           },
-          process.env.SECRET,
-          { expiresIn: "1h" }
+          process.env.SECRET
+          // { expiresIn: "1h" }
         );
         const response = await UserModel.updateOne({ email }, { refreshToken });
         res.cookie("JWT", refreshToken, {
-          maxAge: refreshTokenTime,
+          maxAge: 3600000 * 24,
           httpOnly: true,
-          path: "/api/authentication",
+          path: "/",
         });
         res.json({
           login: true,

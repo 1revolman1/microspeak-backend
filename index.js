@@ -6,11 +6,23 @@ const PORT = process.env.PORT || 8080;
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
+const session = require("express-session");
 const cors = require("cors");
 app.set("trust proxy", true);
 app.use(bodyParser.json());
 app.use(helmet());
 app.use(cookieParser());
+// app.use(
+//   session({
+//     secret: "yes is not bad",
+//     name: "sessionId",
+//     resave: false,
+//     saveUninitialized: true,
+//     store: new MongoStore({
+//       url: connectionOptions,
+//     }),
+//   })
+// );
 app.use(cors({ credentials: true, origin: process.env.PROXY_LINK }));
 app.use(express.static(`${__dirname}/static`));
 
