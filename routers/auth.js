@@ -96,6 +96,18 @@ auth.post("/refresh-token", JWTlCookieMiddleware, async (req, res) => {
           path: "/",
         });
         res.json({ login: false, error: "TOKEN EXPIRED" });
+      } else if (!user.isValidRefreshToken(req.cookies["JWT"])) {
+        const response = await UserModel.updateOne(
+          { email },
+          { refreshToken: "" }
+        );
+        res.status(401);
+        res.cookie("JWT", "213", {
+          maxAge: 0,
+          httpOnly: true,
+          path: "/",
+        });
+        res.json({ login: false, error: "TOKEN EXPIRED" });
       } else {
         const refreshTokenTime = moment();
         const refreshToken = jwt.sign(

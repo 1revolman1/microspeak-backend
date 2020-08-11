@@ -14,7 +14,6 @@ const JWTCookieFactory = function (
   }
 ) {
   return new JwtStrategy(option, async function (jwt_payload, done) {
-    // console.log("Payload ", jwt_payload);
     done(null, jwt_payload);
   });
 };
@@ -26,6 +25,7 @@ const JWTHeaderFactory = function (
 ) {
   return new JwtStrategy(option, async function (jwt_payload, done) {
     done(null, jwt_payload);
+
     // try {
     //   const user = await UserModel.findOne({ email: login });
     //   if (!user) {
