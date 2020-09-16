@@ -12,6 +12,7 @@ const UserSchema = new Schema({
   },
   nickname: {
     type: String,
+    unique: true,
     default: "",
   },
   password: {
@@ -50,6 +51,10 @@ const UserSchema = new Schema({
   fingerprint: {
     type: String,
     minlength: 32,
+  },
+  isOnline: {
+    type: Boolean,
+    default: false,
   },
 });
 UserSchema.methods.isValidPassword = function (newPassword) {

@@ -15,8 +15,15 @@ auth.post("/registration", async (req, res) => {
   const User = new UserModel(req.body);
   try {
     const result = await User.save();
-    res.json({ success: true, data: User });
+    res.json({
+      success: true,
+      nickname: result.nickname,
+      avatar: result.avatar,
+      email: result.email,
+      fingerprint: result.fingerprint,
+    });
   } catch (error) {
+    res.status(400);
     res.json({ success: false, data: error.toString() });
   }
 });
@@ -24,7 +31,7 @@ auth.post("/registration", async (req, res) => {
 auth.post("/login", loginLocalMiddleware, async (req, res) => {
   if (req.user) {
     const {
-      user: { email, avatar, active, _id },
+      user: { email, avatar, nickname, active, _id },
       body: { fingerprint },
     } = req;
     //IN MINI SECONDS
@@ -58,7 +65,13 @@ auth.post("/login", loginLocalMiddleware, async (req, res) => {
       });
       res.json({
         login: true,
-        data: { email, avatar, active, _id },
+        data: {
+          nickname,
+          email,
+          avatar: `${process.env.SERVER_LINK}/user-public/avatars/${avatar}`,
+          active,
+          _id,
+        },
         accessToken,
       });
     } catch (error) {
@@ -72,7 +85,7 @@ auth.post("/refresh-token", JWTlCookieMiddleware, async (req, res) => {
   if (req.user) {
     const {
       ip,
-      user: { email, avatar, active, _id },
+      user: { email, _id },
     } = req;
     try {
       const user = await UserModel.findById(_id);
@@ -95,7 +108,7 @@ auth.post("/refresh-token", JWTlCookieMiddleware, async (req, res) => {
           httpOnly: true,
           path: "/",
         });
-        res.json({ login: false, error: "TOKEN EXPIRED" });
+        res.json({ login: false, error: "No valid fingerpring" });
       } else if (!user.isValidRefreshToken(req.cookies["JWT"])) {
         const response = await UserModel.updateOne(
           { email },
@@ -107,7 +120,7 @@ auth.post("/refresh-token", JWTlCookieMiddleware, async (req, res) => {
           httpOnly: true,
           path: "/",
         });
-        res.json({ login: false, error: "TOKEN EXPIRED" });
+        res.json({ login: false, error: "No valid token" });
       } else {
         const refreshTokenTime = moment();
         const refreshToken = jwt.sign(
@@ -135,7 +148,13 @@ auth.post("/refresh-token", JWTlCookieMiddleware, async (req, res) => {
         });
         res.json({
           login: true,
-          data: { email, avatar, active, _id },
+          data: {
+            email,
+            avatar: user.avatar,
+            active: user.active,
+            nickname: user.nickname,
+            _id,
+          },
           accessToken,
         });
       }

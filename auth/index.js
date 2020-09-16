@@ -19,7 +19,7 @@ function loginLocalMiddleware(...args) {
         next();
       } else {
         res.status(info.status || 401);
-        res.json(info);
+        res.json({ login: false, error: info.status });
       }
     }
   )(...args);
@@ -34,7 +34,8 @@ function JWTlCookieMiddleware(...args) {
         req.user = receiveData;
         next();
       } else {
-        res.sendStatus(info.status || 401);
+        res.status(info.status || 401);
+        res.json({ login: false, error: info.status });
       }
     }
   )(...args);
@@ -49,8 +50,8 @@ function JWTlAuthMiddleware(...args) {
         req.user = receiveData;
         next();
       } else {
-        res.sendStatus(info.status || 401);
-        // res.json(info);
+        res.status(info.status || 401);
+        res.json({ login: false, error: info.status });
       }
     }
   )(...args);

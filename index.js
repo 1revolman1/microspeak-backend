@@ -1,7 +1,7 @@
 //https://gist.github.com/zmts/802dc9c3510d79fd40f9dc38a12bccfc
 require("dotenv").config();
-const express = require("express");
-const app = express();
+const { http, express, app } = require("./socket");
+
 const PORT = process.env.PORT || 8080;
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
@@ -26,10 +26,11 @@ app.use(cookieParser());
 app.use(cors({ credentials: true, origin: process.env.PROXY_LINK }));
 app.use(express.static(`${__dirname}/static`));
 
-const { auth } = require("./routers");
-
+const { auth, settings, user } = require("./routers");
 app.use("/api/authentication", auth);
+app.use("/api/settings", settings);
+app.use("/api/user", user);
 
-app.listen(PORT, () => {
+http.listen(PORT, () => {
   console.log(`Server run at port: ${PORT}`);
 });

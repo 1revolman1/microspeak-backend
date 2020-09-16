@@ -25,24 +25,6 @@ const JWTHeaderFactory = function (
 ) {
   return new JwtStrategy(option, async function (jwt_payload, done) {
     done(null, jwt_payload);
-
-    // try {
-    //   const user = await UserModel.findOne({ email: login });
-    //   if (!user) {
-    //     return done(null, false, { message: "Can`t find user" });
-    //   } else if (!user.isValidPassword(password)) {
-    //     return done(null, false, { message: "Password did not valid!" });
-    //   } else {
-    //     return done(null, user.toJSON());
-    //   }
-    //   //   if (user && user.isValidPassword(password)) {
-    //   //    return done(null, user);
-    //   //   } else {
-    //   //     done(null, false);
-    //   //   }
-    // } catch (error) {
-    //   console.log(`Error ${error}`);
-    // }
   });
 };
 
