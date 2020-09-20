@@ -42,7 +42,7 @@ const UserSchema = new Schema({
   },
   avatar: {
     type: String,
-    default: "default.png",
+    default: `${process.env.SERVER_LINK}/user-public/avatars/default.png`,
   },
   refreshToken: {
     type: String,
@@ -55,6 +55,14 @@ const UserSchema = new Schema({
   isOnline: {
     type: Boolean,
     default: false,
+  },
+  chatLists: {
+    type: [],
+    unique: true,
+  },
+  friendLists: {
+    type: [],
+    unique: true,
   },
 });
 UserSchema.methods.isValidPassword = function (newPassword) {
@@ -69,6 +77,16 @@ UserSchema.methods.isValidFingerPrint = function (newFingerPrint) {
 UserSchema.pre("save", function () {
   this.expirePay = moment().add(7, "days").toDate();
 });
+
+// UserSchema.pre("updateMany", function (next) {
+//   const update = this.getUpdate();
+//   console.log(this.getFilter());
+//   console.log(this.getUpdate());
+//   // if (update.$set && update.$set && !validateUpdate(update.$set)) {
+//   //   throw new Error("Invalid Update");
+//   // }
+//   // next();
+// });
 module.exports = {
   UserSchema,
 };
